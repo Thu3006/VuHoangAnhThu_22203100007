@@ -1,0 +1,161 @@
+﻿@model QuanLyBaiDoXe_UNETI.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Đăng nhập hệ thống";
+}
+
+<div class="row justify-content-center align-items-center" style="min-height: 75vh;">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow border-0 rounded-4 overflow-hidden">
+            <!-- Header Card -->
+            <div class="card-header text-white text-center py-4 border-0" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                <div class="d-inline-flex p-3 rounded-circle bg-white bg-opacity-10 mb-2">
+                    <i class="bi bi-p-square-fill text-info fs-2"></i>
+                </div>
+                <h4 class="mb-1 fw-bold text-white">SmartParking UNETI</h4>
+                <p class="mb-0 small text-light text-opacity-75">Hệ thống Đăng ký & Quản lý Bãi đỗ xe</p>
+            </div>
+
+            <!-- Body Card -->
+            <div class="card-body p-4 p-md-5 bg-white">
+                <!-- Thông báo khôi phục mật khẩu nếu có -->
+                @if (TempData["ForgotSuccess"] != null)
+                {
+                    <div class="alert alert-success py-2 small mb-3">
+                        <i class="bi bi-check-circle-fill me-1"></i>@TempData["ForgotSuccess"]
+                    </div>
+                }
+                @if (TempData["ForgotError"] != null)
+                {
+                    <div class="alert alert-danger py-2 small mb-3">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>@TempData["ForgotError"]
+                    </div>
+                }
+
+                <form asp-action="DangNhap" method="post" id="loginForm" autocomplete="off">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-3" role="alert"></div>
+
+                    <!-- Tên đăng nhập -->
+                    <div class="mb-3">
+                        <label asp-for="TenDangNhap" class="form-label small fw-bold text-secondary">Tên đăng nhập</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                            <input asp-for="TenDangNhap" id="usernameInput" class="form-control border-start-0" placeholder="Nhập tên tài khoản..." autofocus />
+                        </div>
+                        <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Mật khẩu -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label asp-for="MatKhau" class="form-label small fw-bold text-secondary mb-0">Mật khẩu</label>
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#forgotModal" class="small text-decoration-none text-primary">
+                                Quên mật khẩu?
+                            </a>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+                            <input asp-for="MatKhau" type="password" id="passwordInput" class="form-control border-start-0 border-end-0" placeholder="Nhập mật khẩu..." autocomplete="new-password" />
+                            <button class="btn btn-outline-light border border-start-0 bg-light text-muted" type="button" id="togglePassword">
+                                <i class="bi bi-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="MatKhau" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Ghi nhớ đăng nhập hoạt động thật -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rememberMe">
+                            <label class="form-check-label small text-secondary" for="rememberMe">
+                                Ghi nhớ đăng nhập
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Nút Đăng nhập -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary py-2 fw-semibold rounded-3 shadow-sm">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Khôi phục mật khẩu qua Gmail -->
+<div class="modal fade" id="forgotModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content shadow border-0 rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold text-dark"><i class="bi bi-shield-lock text-primary me-2"></i>Quên mật khẩu</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="QuenMatKhau" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <p class="small text-muted mb-3">Nhập tên đăng nhập và địa chỉ Gmail đã đăng ký để xác thực đặt lại mật khẩu:</p>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Tên đăng nhập</label>
+                        <input type="text" name="tenDangNhap" class="form-control" placeholder="Ví dụ: khachhang01" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Email liên kết</label>
+                        <input type="email" name="email" class="form-control" placeholder="Ví dụ: nguyenvana@gmail.com" required />
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light btn-sm px-3" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary btn-sm px-3 fw-semibold">Xác nhận khôi phục</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // 1. Bật / tắt ẩn hiện mật khẩu
+        const togglePassword = document.querySelector('#togglePassword');
+        const passwordInput = document.querySelector('#passwordInput');
+        const eyeIcon = document.querySelector('#eyeIcon');
+
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            eyeIcon.classList.toggle('bi-eye');
+            eyeIcon.classList.toggle('bi-eye-slash');
+        });
+
+        // 2. Logic Ghi nhớ đăng nhập bằng LocalStorage
+        const usernameInput = document.getElementById('usernameInput');
+        const rememberCheckbox = document.getElementById('rememberMe');
+        const loginForm = document.getElementById('loginForm');
+
+        // Tự động nạp lại tên đăng nhập đã lưu từ trước (nếu có)
+        const savedUsername = localStorage.getItem('smartparking_username');
+        if (savedUsername) {
+            usernameInput.value = savedUsername;
+            rememberCheckbox.checked = true;
+        }
+
+        // Khi người dùng bấm submit form đăng nhập
+        loginForm.addEventListener('submit', function () {
+            if (rememberCheckbox.checked) {
+                localStorage.setItem('smartparking_username', usernameInput.value.trim());
+            } else {
+                localStorage.removeItem('smartparking_username');
+            }
+        });
+    </script>
+}

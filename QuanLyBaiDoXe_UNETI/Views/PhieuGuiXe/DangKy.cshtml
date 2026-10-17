@@ -1,0 +1,69 @@
+﻿@model QuanLyBaiDoXe_UNETI.Models.DangKyGuiXeViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký gửi xe";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="card-title mb-0 fw-bold text-dark">
+                    <i class="bi bi-calendar-plus text-primary me-2"></i>Đăng Ký Gửi Xe Trực Tuyến
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="DangKy" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="MaPhuongTien" class="form-label fw-semibold">Chọn phương tiện của bạn <span class="text-danger">*</span></label>
+                        <select asp-for="MaPhuongTien" asp-items="ViewBag.MaPhuongTien" class="form-select">
+                            <option value="">-- Chọn biển số xe --</option>
+                        </select>
+                        <span asp-validation-for="MaPhuongTien" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MaViTri" class="form-label fw-semibold">Chọn vị trí đỗ xe <span class="text-danger">*</span></label>
+                        <select asp-for="MaViTri" asp-items="ViewBag.MaViTri" class="form-select">
+                            <option value="">-- Chọn mã vị trí --</option>
+                        </select>
+                        <span asp-validation-for="MaViTri" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="ThoiGianDuKienVao" class="form-label fw-semibold">Thời gian dự kiến vào <span class="text-danger">*</span></label>
+                            <input asp-for="ThoiGianDuKienVao" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="ThoiGianDuKienVao" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ThoiGianDuKienRa" class="form-label fw-semibold">Thời gian dự kiến ra <span class="text-danger">*</span></label>
+                            <input asp-for="ThoiGianDuKienRa" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="ThoiGianDuKienRa" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info py-2 small">
+                        <i class="bi bi-info-circle me-1"></i>Hệ thống sẽ tự động kiểm tra xem vị trí có bị trùng lịch đỗ với phương tiện khác hay không trước khi tạo phiếu.
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a asp-controller="ViTriDoXe" asp-action="Index" class="btn btn-light px-4">Quay lại tra cứu</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-send-check me-1"></i>Gửi yêu cầu đăng ký
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

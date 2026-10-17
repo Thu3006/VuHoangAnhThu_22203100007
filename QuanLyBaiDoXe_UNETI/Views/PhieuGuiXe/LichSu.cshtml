@@ -1,0 +1,173 @@
+﻿@model IEnumerable<QuanLyBaiDoXe_UNETI.Models.PhieuGuiXe>
+
+@{
+    ViewData["Title"] = "Lịch sử gửi xe";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-clock-history text-primary me-2"></i>Lịch Sử & Phiếu Gửi Xe Của Tôi
+        </h3>
+        <p class="text-muted mb-0 small">Theo dõi trạng thái các lượt gửi xe và mã QR check-in/out điện tử</p>
+    </div>
+    <a asp-action="DangKy" class="btn btn-primary d-flex align-items-center gap-2 px-3 py-2">
+        <i class="bi bi-plus-circle-fill"></i>
+        <span>Đăng ký lượt mới</span>
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Mã phiếu</th>
+                        <th>Biển số xe</th>
+                        <th>Vị trí đỗ</th>
+                        <th>Dự kiến vào - ra</th>
+                        <th>Đơn giá / giờ</th>
+                        <th>Thành tiền</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4">Vé điện tử</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox me-1"></i>Chưa có lịch sử gửi xe nào.
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var item in Model)
+                    {
+                        var badgeClass = item.TrangThai switch
+                        {
+                            "Chờ xác nhận" => "bg-warning text-dark",
+                            "Đang gửi" => "bg-primary",
+                            "Đã lấy xe" => "bg-success",
+                            _ => "bg-secondary"
+                        };
+
+                        <tr>
+                            <td class="ps-4 fw-bold text-secondary">#@item.MaPhieu</td>
+                            <td>
+                                <span class="badge bg-light text-dark border px-2 py-1 fw-bold">
+                                    @(item.PhuongTien?.BienSoXe ?? "—")
+                                </span>
+                            </td>
+                            <td class="fw-semibold text-primary">@(item.ViTriDoXe?.TenViTri ?? "—")</td>
+                            <td class="small">
+                                <div><i class="bi bi-box-arrow-in-right text-success me-1"></i>@item.ThoiGianDuKienVao.ToString("dd/MM/yyyy HH:mm")</div>
+                                <div><i class="bi bi-box-arrow-right text-danger me-1"></i>@item.ThoiGianDuKienRa.ToString("dd/MM/yyyy HH:mm")</div>
+                            </td>
+                            <td>@item.DonGiaTheoGio.ToString("N0") đ/h</td>
+                            <td class="fw-bold text-success">
+                                @(item.ThanhTien.HasValue? item.ThanhTien.Value.ToString("N0") + " đ" : "Chờ tính")
+                            </td>
+                            <td>
+                                <span class="badge @badgeClass px-2 py-1">@item.TrangThai</span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <button type="button" class="btn btn-sm btn-outline-primary fw-semibold"
+                                        onclick="showQRCode('@item.MaPhieu', '@(item.PhuongTien?.BienSoXe)', '@(item.ViTriDoXe?.TenViTri)', '@item.ThoiGianDuKienVao.ToString("dd/MM/yyyy HH:mm")', '@item.TrangThai')">
+                                    <i class="bi bi-qr-code me-1"></i>Mã QR
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal hiển thị QR Code -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content shadow border-0 rounded-4">
+            <div class="modal-header border-0 pb-0 justify-content-end">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center pt-0 px-4 pb-4">
+                <div class="mb-2">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 fw-semibold">
+                        VÉ GỬI XE ĐIỆN TỬ
+                    </span>
+                </div>
+                <h5 class="fw-bold text-dark mb-3" id="qrModalTitle">Phiếu #00</h5>
+
+                <div class="p-3 bg-light rounded-3 d-inline-block shadow-sm mb-3">
+                    <div id="qrcodeCanvas"></div>
+                </div>
+
+                <div class="text-start bg-light p-3 rounded-3 small">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Biển số:</span>
+                        <strong class="text-dark" id="qrBienSo">—</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Vị trí đỗ:</span>
+                        <strong class="text-primary" id="qrViTri">—</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Giờ vào:</span>
+                        <span class="text-secondary" id="qrGioVao">—</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Trạng thái:</span>
+                        <span class="badge bg-secondary" id="qrTrangThai">—</span>
+                    </div>
+                </div>
+                <small class="text-muted d-block mt-3 fst-italic">Quét mã tại cổng kiểm soát để xác thực</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Thư viện sinh QRCode JS siêu nhẹ, chạy hoàn toàn offline -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        var qrInstance = null;
+        function showQRCode(maPhieu, bienSo, viTri, gioVao, trangThai) {
+            document.getElementById('qrModalTitle').innerText = 'Phiếu Gửi #' + maPhieu;
+            document.getElementById('qrBienSo').innerText = bienSo;
+            document.getElementById('qrViTri').innerText = viTri;
+            document.getElementById('qrGioVao').innerText = gioVao;
+            document.getElementById('qrTrangThai').innerText = trangThai;
+
+            // Xóa QR cũ
+            var container = document.getElementById('qrcodeCanvas');
+            container.innerHTML = "";
+
+            // Nội dung nhúng vào QR Code
+            var qrText = "SMARTPARKING_UNETI|PHIEU:" + maPhieu + "|XE:" + bienSo + "|VITRI:" + viTri + "|VAO:" + gioVao;
+
+            // Khởi tạo QR Code mới
+            new QRCode(container, {
+                text: qrText,
+                width: 170,
+                height: 170,
+                colorDark: "#0f172a",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            var modal = new bootstrap.Modal(document.getElementById('qrModal'));
+            modal.show();
+        }
+    </script>
+}

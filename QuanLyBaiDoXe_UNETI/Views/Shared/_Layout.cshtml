@@ -1,0 +1,253 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    var hoTen = HttpContextAccessor.HttpContext?.Session.GetString("HoTen");
+    var vaiTro = HttpContextAccessor.HttpContext?.Session.GetString("VaiTro");
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SmartParking UNETI</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons (Bộ icon chính thức) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <!-- Google Font: Inter / Roboto -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f4f6f9;
+            color: #2b3445;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar Header */
+        .navbar-custom {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 0.8rem 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: -0.5px;
+            color: #ffffff !important;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-brand i {
+            color: #38bdf8;
+            font-size: 1.5rem;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: #cbd5e1 !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffffff !important;
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Badge Vai Trò */
+        .badge-admin {
+            background-color: #f43f5e;
+            color: #ffffff;
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .badge-khach {
+            background-color: #0ea5e9;
+            color: #ffffff;
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        /* Main Container */
+        main {
+            flex: 1;
+            padding-top: 1.5rem;
+            padding-bottom: 2.5rem;
+        }
+
+        /* Card bo góc mượt mà */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            background-color: #ffffff;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 0.9rem;
+            padding: 1.2rem 0;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container-fluid">
+                <!-- Logo & Tên dự án -->
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-p-square-fill"></i>
+                    <span>SmartParking <span style="color: #38bdf8;">UNETI</span></span>
+                </a>
+
+                <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="bi bi-list fs-2"></i>
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <!-- Danh sách Menu phân theo quyền -->
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door"></i> Trang chủ
+                            </a>
+                        </li>
+
+                        @if (vaiTro == "Admin")
+                        {
+                            <!-- Menu dành riêng cho Admin -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="LoaiPhuongTien" asp-action="Index">
+                                    <i class="bi bi-truck"></i> Loại xe
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ViTriDoXe" asp-action="Index">
+                                    <i class="bi bi-geo-alt"></i> Vị trí đỗ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="PhieuGuiXe" asp-action="Index">
+                                    <i class="bi bi-ticket-detailed"></i> Phiếu gửi xe
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ThongKe" asp-action="Index">
+                                    <i class="bi bi-graph-up-arrow"></i> Thống kê
+                                </a>
+                            </li>
+                        }
+                        else if (vaiTro == "KhachHang")
+                        {
+                            <!-- Menu dành riêng cho Khách hàng -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ViTriDoXe" asp-action="Index">
+                                    <i class="bi bi-search"></i> Tra cứu chỗ đỗ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="PhuongTien" asp-action="Index">
+                                    <i class="bi bi-bicycle"></i> Xe của tôi
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="PhieuGuiXe" asp-action="DangKy">
+                                    <i class="bi bi-calendar-plus"></i> Đăng ký gửi
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="PhieuGuiXe" asp-action="LichSu">
+                                    <i class="bi bi-clock-history"></i> Lịch sử gửi
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                    <!-- Khu vực góc phải: Thông tin User / Đăng nhập -->
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        @if (!string.IsNullOrEmpty(hoTen))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
+                                    <span>@hoTen</span>
+                                    <span class="@(vaiTro == "Admin" ? "badge-admin" : "badge-khach")">@vaiTro</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2" aria-labelledby="userMenu">
+                                    <li><h6 class="dropdown-header text-muted">Tài khoản @vaiTro</h6></li>
+                                    <li>
+                                        <a class="dropdown-item py-2 d-flex align-items-center gap-2" asp-controller="TaiKhoan" asp-action="HoSo">
+                                            <i class="bi bi-person text-muted"></i> Thông tin cá nhân
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2 d-flex align-items-center gap-2" asp-controller="TaiKhoan" asp-action="DoiMatKhau">
+                                            <i class="bi bi-key text-muted"></i> Đổi mật khẩu
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item py-2 text-danger d-flex align-items-center gap-2" asp-controller="TaiKhoan" asp-action="DangXuat">
+                                            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-outline-light px-3 py-1 d-flex align-items-center gap-2" asp-controller="TaiKhoan" asp-action="DangNhap">
+                                    <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            &copy; 2026 - <strong>SmartParking UNETI</strong> • Hệ thống Quản lý Bãi đỗ xe & Đăng ký gửi xe
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

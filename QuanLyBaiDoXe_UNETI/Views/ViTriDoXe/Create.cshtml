@@ -1,0 +1,75 @@
+﻿@model QuanLyBaiDoXe_UNETI.Models.ViTriDoXe
+
+@{
+    ViewData["Title"] = "Thêm vị trí đỗ xe";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="card-title mb-0 fw-bold text-dark">
+                    <i class="bi bi-plus-circle text-primary me-2"></i>Thêm Mới Vị Trí Đỗ Xe
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="TenViTri" class="form-label fw-semibold">Tên vị trí <span class="text-danger">*</span></label>
+                        <input asp-for="TenViTri" class="form-control" placeholder="Ví dụ: A1-11, B2-05..." />
+                        <span asp-validation-for="TenViTri" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MaLoaiPhuongTien" class="form-label fw-semibold">Loại phương tiện phù hợp <span class="text-danger">*</span></label>
+                        <select asp-for="MaLoaiPhuongTien" asp-items="ViewBag.MaLoaiPhuongTien" class="form-select">
+                            <option value="">-- Chọn loại xe --</option>
+                        </select>
+                        <span asp-validation-for="MaLoaiPhuongTien" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="KhuVuc" class="form-label fw-semibold">Khu vực <span class="text-danger">*</span></label>
+                            <input asp-for="KhuVuc" class="form-control" placeholder="Ví dụ: Khu A, Khu B..." />
+                            <span asp-validation-for="KhuVuc" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Tang" class="form-label fw-semibold">Tầng <span class="text-danger">*</span></label>
+                            <input asp-for="Tang" type="number" min="1" max="20" class="form-control" value="1" />
+                            <span asp-validation-for="Tang" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="TrangThai" class="form-label fw-semibold">Trạng thái khởi tạo</label>
+                        <select asp-for="TrangThai" class="form-select">
+                            <option value="Còn trống">Còn trống</option>
+                            <option value="Đang sử dụng">Đang sử dụng</option>
+                            <option value="Tạm ngừng">Tạm ngừng</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="MoTa" class="form-label fw-semibold">Mô tả thêm</label>
+                        <textarea asp-for="MoTa" rows="3" class="form-control" placeholder="Ghi chú vị trí đặc biệt (ví dụ: gần cửa thoát hiểm, có mái che...)"></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-light px-4">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold"><i class="bi bi-save me-1"></i>Lưu vị trí</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

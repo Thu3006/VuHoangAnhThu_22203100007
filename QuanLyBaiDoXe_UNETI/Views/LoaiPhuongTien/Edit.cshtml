@@ -1,0 +1,59 @@
+﻿@model QuanLyBaiDoXe_UNETI.Models.LoaiPhuongTien
+
+@{
+    ViewData["Title"] = "Chỉnh sửa loại phương tiện";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="card-title mb-0 fw-bold text-dark">
+                    <i class="bi bi-pencil-square text-primary me-2"></i>Chỉnh Sửa Loại Phương Tiện
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="MaLoaiPhuongTien" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="TenLoaiPhuongTien" class="form-label fw-semibold">Tên loại xe <span class="text-danger">*</span></label>
+                        <input asp-for="TenLoaiPhuongTien" class="form-control" />
+                        <span asp-validation-for="TenLoaiPhuongTien" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DonGiaTheoGio" class="form-label fw-semibold">Đơn giá theo giờ (VNĐ/h) <span class="text-danger">*</span></label>
+                        <input asp-for="DonGiaTheoGio" type="number" step="1000" class="form-control" />
+                        <span asp-validation-for="DonGiaTheoGio" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MoTa" class="form-label fw-semibold">Mô tả</label>
+                        <textarea asp-for="MoTa" rows="3" class="form-control"></textarea>
+                    </div>
+
+                    <div class="mb-4 form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" asp-for="TrangThai">
+                        <label class="form-check-label fw-semibold" asp-for="TrangThai">Trạng thái hoạt động</label>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-light px-4">Quay lại</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-check-lg me-1"></i>Cập nhật
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,65 @@
+﻿@model QuanLyBaiDoXe_UNETI.Models.PhuongTien
+
+@{
+    ViewData["Title"] = "Chỉnh sửa phương tiện";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="card-title mb-0 fw-bold text-dark">
+                    <i class="bi bi-pencil-square text-primary me-2"></i>Chỉnh Sửa Phương Tiện
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="MaPhuongTien" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="BienSoXe" class="form-label fw-semibold">Biển số xe <span class="text-danger">*</span></label>
+                        <input asp-for="BienSoXe" class="form-control" />
+                        <span asp-validation-for="BienSoXe" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MaLoaiPhuongTien" class="form-label fw-semibold">Loại phương tiện <span class="text-danger">*</span></label>
+                        <select asp-for="MaLoaiPhuongTien" asp-items="ViewBag.MaLoaiPhuongTien" class="form-select"></select>
+                        <span asp-validation-for="MaLoaiPhuongTien" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="NhanHieu" class="form-label fw-semibold">Nhãn hiệu</label>
+                            <input asp-for="NhanHieu" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="MauSac" class="form-label fw-semibold">Màu sắc</label>
+                            <input asp-for="MauSac" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="MoTa" class="form-label fw-semibold">Ghi chú</label>
+                        <textarea asp-for="MoTa" rows="3" class="form-control"></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-light px-4">Quay lại</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-check-lg me-1"></i>Cập nhật
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

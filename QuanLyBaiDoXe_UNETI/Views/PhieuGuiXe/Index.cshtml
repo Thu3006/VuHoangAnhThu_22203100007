@@ -1,0 +1,353 @@
+﻿@model IEnumerable<QuanLyBaiDoXe_UNETI.Models.PhieuGuiXe>
+
+@{
+    ViewData["Title"] = "Quản lý phiếu gửi xe";
+}
+
+<div class="row align-items-center mb-4">
+    <div class="col-md-8">
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-ticket-detailed-fill text-primary me-2"></i>Quản Lý Phiếu Gửi Xe
+        </h3>
+        <p class="text-muted mb-0 small">Xác nhận xe vào/ra bãi, quét mã QR vé xe và quản lý trạng thái phiếu</p>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- Bộ Lọc & Tìm Kiếm Phiếu Gửi -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-3 bg-white rounded-3">
+        <form method="get" asp-action="Index">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control border-start-0" placeholder="Tìm theo biển số xe hoặc tên chủ xe..." />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="trangThai" class="form-select">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <!option value="Chờ xác nhận" @(ViewBag.TrangThai == "Chờ xác nhận" ? "selected" : "")>Chờ xác nhận</!option>
+                        <!option value="Đang gửi" @(ViewBag.TrangThai == "Đang gửi" ? "selected" : "")>Đang gửi</!option>
+                        <!option value="Đã lấy xe" @(ViewBag.TrangThai == "Đã lấy xe" ? "selected" : "")>Đã lấy xe</!option>
+                        <!option value="Đã hủy" @(ViewBag.TrangThai == "Đã hủy" ? "selected" : "")>Đã hủy</!option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="maLoaiPhuongTien" asp-items="ViewBag.DanhSachLoaiXe" class="form-select">
+                        <option value="">-- Loại xe --</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold"><i class="bi bi-funnel-fill me-1"></i>Lọc</button>
+                    <a asp-action="Index" class="btn btn-light" title="Đặt lại"><i class="bi bi-arrow-counterclockwise"></i></a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bảng Danh Sách Phiếu Gửi Xe -->
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Mã</th>
+                        <th>Biển số & Chủ xe</th>
+                        <th>Vị trí</th>
+                        <th>Dự kiến vào - ra</th>
+                        <th>Thực tế vào - ra</th>
+                        <th>Thành tiền</th>
+                        <th>Trạng thái</th>
+                        <th>QR</th>
+                        <th class="text-end pe-4">Xử lý nghiệp vụ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>Không tìm thấy phiếu gửi xe nào phù hợp.
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var item in Model)
+                    {
+                        var badgeClass = item.TrangThai switch
+                        {
+                            "Chờ xác nhận" => "bg-warning text-dark",
+                            "Đang gửi" => "bg-primary",
+                            "Đã lấy xe" => "bg-success",
+                            _ => "bg-secondary"
+                        };
+
+                        <tr>
+                            <td class="ps-4 fw-bold text-secondary">#@item.MaPhieu</td>
+                            <td>
+                                <div class="fw-bold text-dark">@(item.PhuongTien?.BienSoXe ?? "—")</div>
+                                <small class="text-muted">Chủ xe: @(item.PhuongTien?.ChuPhuongTien?.HoTen ?? "Khách vãng lai")</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-primary border border-primary-subtle px-2 py-1 fw-bold fs-6">
+                                    @(item.ViTriDoXe?.TenViTri ?? "—")
+                                </span>
+                            </td>
+                            <td class="small">
+                                <div><i class="bi bi-box-arrow-in-right text-muted me-1"></i>@item.ThoiGianDuKienVao.ToString("dd/MM HH:mm")</div>
+                                <div><i class="bi bi-box-arrow-right text-muted me-1"></i>@item.ThoiGianDuKienRa.ToString("dd/MM HH:mm")</div>
+                            </td>
+                            <td class="small">
+                                @if (item.ThoiGianVaoThucTe.HasValue)
+                                {
+                                    <div class="text-success fw-semibold"><i class="bi bi-check-circle me-1"></i>Vào: @item.ThoiGianVaoThucTe.Value.ToString("dd/MM HH:mm")</div>
+                                }
+                                else
+                                {
+                                    <div class="text-muted">Chưa vào</div>
+                                }
+
+                                @if (item.ThoiGianRaThucTe.HasValue)
+                                {
+                                    <div class="text-danger fw-semibold"><i class="bi bi-check-circle me-1"></i>Ra: @item.ThoiGianRaThucTe.Value.ToString("dd/MM HH:mm")</div>
+                                }
+                            </td>
+                            <td>
+                                @if (item.ThanhTien.HasValue)
+                                {
+                                    <span class="fw-bold text-success fs-6">@item.ThanhTien.Value.ToString("N0") VNĐ</span>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">@item.DonGiaTheoGio.ToString("N0") đ/h</small>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge @badgeClass px-2 py-1">@item.TrangThai</span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-light border" title="Xem mã QR vé"
+                                        onclick="showQRCode('@item.MaPhieu', '@(item.PhuongTien?.BienSoXe)', '@(item.ViTriDoXe?.TenViTri)', '@item.ThoiGianDuKienVao.ToString("dd/MM/yyyy HH:mm")', '@item.TrangThai')">
+                                    <i class="bi bi-qr-code text-primary"></i>
+                                </button>
+                            </td>
+                            <td class="text-end pe-4">
+                                @if (item.TrangThai == "Chờ xác nhận")
+                                {
+                                    <div class="btn-group btn-group-sm">
+                                        <form asp-action="XacNhanVao" asp-route-id="@item.MaPhieu" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-success fw-semibold">
+                                                <i class="bi bi-box-arrow-in-right me-1"></i>Xe vào
+                                            </button>
+                                        </form>
+                                        <form asp-action="HuyPhieu" asp-route-id="@item.MaPhieu" method="post" class="d-inline ms-1" onsubmit="return confirm('Bạn có chắc muốn hủy phiếu này?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Hủy phiếu">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                                else if (item.TrangThai == "Đang gửi")
+                                {
+                                    <form asp-action="XacNhanRa" asp-route-id="@item.MaPhieu" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger fw-semibold">
+                                            <i class="bi bi-cash-coin me-1"></i>Xe ra & Tính tiền
+                                        </button>
+                                    </form>
+                                }
+                                else if (item.TrangThai == "Đã lấy xe")
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-primary" title="In biên lai thu tiền"
+                                            onclick="inBienLai('@item.MaPhieu', '@(item.PhuongTien?.BienSoXe)', '@(item.PhuongTien?.LoaiPhuongTien?.TenLoaiPhuongTien)', '@(item.ViTriDoXe?.TenViTri)', '@(item.ThoiGianVaoThucTe?.ToString("dd/MM/yyyy HH:mm"))', '@(item.ThoiGianRaThucTe?.ToString("dd/MM/yyyy HH:mm"))', '@(item.ThanhTien?.ToString("N0"))')">
+                                        <i class="bi bi-printer-fill me-1"></i>In biên lai
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small"><i class="bi bi-slash-circle me-1"></i>Đã hủy</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal hiển thị QR Code -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content shadow border-0 rounded-4">
+            <div class="modal-header border-0 pb-0 justify-content-end">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center pt-0 px-4 pb-4">
+                <div class="mb-2">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 fw-semibold">
+                        VÉ GỬI XE ĐIỆN TỬ
+                    </span>
+                </div>
+                <h5 class="fw-bold text-dark mb-3" id="qrModalTitle">Phiếu #00</h5>
+
+                <div class="p-3 bg-light rounded-3 d-inline-block shadow-sm mb-3">
+                    <div id="qrcodeCanvas"></div>
+                </div>
+
+                <div class="text-start bg-light p-3 rounded-3 small">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Biển số:</span>
+                        <strong class="text-dark" id="qrBienSo">—</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Vị trí đỗ:</span>
+                        <strong class="text-primary" id="qrViTri">—</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Giờ vào:</span>
+                        <span class="text-secondary" id="qrGioVao">—</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Trạng thái:</span>
+                        <span class="badge bg-secondary" id="qrTrangThai">—</span>
+                    </div>
+                </div>
+                <small class="text-muted d-block mt-3 fst-italic">Mã QR dùng để xác thực nhanh tại barrier</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Hóa đơn thu tiền nhiệt K80 -->
+<div class="modal fade" id="receiptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow rounded-3">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="receiptPrintArea">
+                <div class="text-center pb-2 border-bottom border-dashed">
+                    <h6 class="fw-bold mb-1 text-uppercase">BÃI ĐỖ XE SMARTPARKING UNETI</h6>
+                    <small class="text-muted d-block">Trường Đại học Kinh tế - Kỹ thuật Công nghiệp</small>
+                    <small class="text-muted d-block">Hotline: 024.3862.1504</small>
+                    <div class="fw-bold mt-2 fs-6">HÓA ĐƠN THU TIỀN GỬI XE</div>
+                    <small class="text-secondary" id="rcptMaPhieu">Số phiếu: #00</small>
+                </div>
+
+                <div class="py-2 border-bottom border-dashed small">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Biển số xe:</span>
+                        <strong id="rcptBienSo">—</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Loại xe:</span>
+                        <span id="rcptLoaiXe">—</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Vị trí đỗ:</span>
+                        <strong class="text-primary" id="rcptViTri">—</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Thời gian vào:</span>
+                        <span id="rcptGioVao">—</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Thời gian ra:</span>
+                        <span id="rcptGioRa">—</span>
+                    </div>
+                </div>
+
+                <div class="py-3 text-center">
+                    <div class="small text-muted mb-1">TỔNG TIỀN THANH TOÁN</div>
+                    <div class="fs-4 fw-bold text-success" id="rcptTongTien">0 VNĐ</div>
+                    <small class="text-muted fst-italic">(Đã bao gồm thuế GTGT)</small>
+                </div>
+
+                <div class="text-center pt-2 border-top border-dashed small text-muted">
+                    <p class="mb-1">Cảm ơn quý khách đã sử dụng dịch vụ!</p>
+                    <small>Vui lòng giữ biên lai đối chiếu khi cần thiết</small>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                <button type="button" class="btn btn-light btn-sm w-50" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary btn-sm w-50" onclick="printReceiptContent()">
+                    <i class="bi bi-printer me-1"></i>In ngay
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        function showQRCode(maPhieu, bienSo, viTri, gioVao, trangThai) {
+            document.getElementById('qrModalTitle').innerText = 'Phiếu Gửi #' + maPhieu;
+            document.getElementById('qrBienSo').innerText = bienSo;
+            document.getElementById('qrViTri').innerText = viTri;
+            document.getElementById('qrGioVao').innerText = gioVao;
+            document.getElementById('qrTrangThai').innerText = trangThai;
+
+            var container = document.getElementById('qrcodeCanvas');
+            container.innerHTML = "";
+
+            var qrText = "SMARTPARKING_UNETI|PHIEU:" + maPhieu + "|XE:" + bienSo + "|VITRI:" + viTri + "|VAO:" + gioVao;
+
+            new QRCode(container, {
+                text: qrText,
+                width: 170,
+                height: 170,
+                colorDark: "#0f172a",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            var modal = new bootstrap.Modal(document.getElementById('qrModal'));
+            modal.show();
+        }
+
+        function inBienLai(maPhieu, bienSo, loaiXe, viTri, gioVao, gioRa, thanhTien) {
+            document.getElementById('rcptMaPhieu').innerText = 'Số phiếu: #' + maPhieu;
+            document.getElementById('rcptBienSo').innerText = bienSo;
+            document.getElementById('rcptLoaiXe').innerText = loaiXe;
+            document.getElementById('rcptViTri').innerText = viTri;
+            document.getElementById('rcptGioVao').innerText = gioVao || '—';
+            document.getElementById('rcptGioRa').innerText = gioRa || '—';
+            document.getElementById('rcptTongTien').innerText = (thanhTien || '0') + ' VNĐ';
+
+            var modal = new bootstrap.Modal(document.getElementById('receiptModal'));
+            modal.show();
+        }
+
+        function printReceiptContent() {
+            var printContent = document.getElementById('receiptPrintArea').innerHTML;
+            var originalContent = document.body.innerHTML;
+
+            document.body.innerHTML = printContent;
+            window.print();
+            document.body.innerHTML = originalContent;
+            location.reload();
+        }
+    </script>
+}

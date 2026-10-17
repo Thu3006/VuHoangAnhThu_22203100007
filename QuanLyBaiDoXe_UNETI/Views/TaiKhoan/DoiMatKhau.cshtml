@@ -1,0 +1,57 @@
+﻿@model QuanLyBaiDoXe_UNETI.Models.DoiMatKhauViewModel
+
+@{
+    ViewData["Title"] = "Đổi mật khẩu";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 pb-0 text-center">
+                    <h5 class="fw-bold text-dark mb-1">
+                        <i class="bi bi-shield-lock-fill text-primary me-2"></i>Đổi Mật Khẩu
+                    </h5>
+                    <p class="text-muted small">Mật khẩu mới sẽ được mã hóa an toàn qua chuẩn SHA-256</p>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="DoiMatKhau" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="MatKhauCu" class="form-label small fw-bold text-secondary"></label>
+                            <input asp-for="MatKhauCu" class="form-control" type="password" placeholder="Nhập mật khẩu hiện tại" />
+                            <span asp-validation-for="MatKhauCu" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MatKhauMoi" class="form-label small fw-bold text-secondary"></label>
+                            <input asp-for="MatKhauMoi" class="form-control" type="password" placeholder="Tối thiểu 6 ký tự" />
+                            <span asp-validation-for="MatKhauMoi" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="XacNhanMatKhau" class="form-label small fw-bold text-secondary"></label>
+                            <input asp-for="XacNhanMatKhau" class="form-control" type="password" placeholder="Nhập lại mật khẩu mới" />
+                            <span asp-validation-for="XacNhanMatKhau" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary fw-semibold py-2">
+                                <i class="bi bi-check-lg me-1"></i>Cập nhật mật khẩu
+                            </button>
+                            <a asp-action="HoSo" class="btn btn-light py-2 small text-muted text-center">Hủy bỏ</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

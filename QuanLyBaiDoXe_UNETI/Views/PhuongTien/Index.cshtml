@@ -1,0 +1,85 @@
+﻿@model IEnumerable<QuanLyBaiDoXe_UNETI.Models.PhuongTien>
+
+@{
+    ViewData["Title"] = "Phương tiện của tôi";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-bicycle text-primary me-2"></i>Phương Tiện Của Tôi
+        </h3>
+        <p class="text-muted mb-0 small">Quản lý danh sách phương tiện cá nhân đăng ký gửi xe tại bãi</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary d-flex align-items-center gap-2 px-3 py-2">
+        <i class="bi bi-plus-circle-fill"></i>
+        <span>Đăng ký xe mới</span>
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Biển số xe</th>
+                        <th>Loại xe</th>
+                        <th>Nhãn hiệu</th>
+                        <th>Màu sắc</th>
+                        <th>Mô tả</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="bi bi-info-circle me-1"></i>Bạn chưa đăng ký phương tiện nào. Bấm "Đăng ký xe mới" để thêm.
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <span class="badge bg-light text-dark border border-secondary-subtle px-3 py-2 fs-6 fw-bold">
+                                    @item.BienSoXe
+                                </span>
+                            </td>
+                            <td class="fw-semibold">@(item.LoaiPhuongTien?.TenLoaiPhuongTien ?? "—")</td>
+                            <td>@(item.NhanHieu ?? "—")</td>
+                            <td>@(item.MauSac ?? "—")</td>
+                            <td class="text-secondary small">@(string.IsNullOrEmpty(item.MoTa) ? "—" : item.MoTa)</td>
+                            <td>
+                                @if (item.TrangThai)
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Tạm khóa</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <a asp-action="Edit" asp-route-id="@item.MaPhuongTien" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-pencil-square me-1"></i>Sửa
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
