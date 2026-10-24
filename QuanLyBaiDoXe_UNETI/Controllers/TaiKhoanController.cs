@@ -4,6 +4,9 @@ using QuanLyBaiDoXe_UNETI.Models;
 
 namespace QuanLyBaiDoXe_UNETI.Controllers
 {
+    // Họ và tên: Vũ Hoàng Anh Thư
+    // Mã sinh viên: 22203100007
+    // Nội dung thực hiện:  Quản lý tài khoản, Xác thực người dùng, Phân quyền hệ thống & Bảo mật mật khẩu
     public class TaiKhoanController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -13,7 +16,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             _context = context;
         }
 
-        // GET: /TaiKhoan/DangNhap
         [HttpGet]
         public IActionResult DangNhap()
         {
@@ -24,7 +26,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View();
         }
 
-        // POST: /TaiKhoan/DangNhap
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DangNhap(LoginViewModel model)
@@ -34,18 +35,17 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                 return View(model);
             }
 
-            // Tìm tài khoản theo tên đăng nhập
             var user = await _context.TaiKhoan
                 .FirstOrDefaultAsync(u => u.TenDangNhap == model.TenDangNhap);
 
-            // Kiểm tra mật khẩu bằng hàm VerifyPassword (so khớp SHA-256)
+            // Xác thực thông tin đăng nhập bằng giải thuật băm mật khẩu
             if (user == null || !PasswordHelper.VerifyPassword(model.MatKhau, user.MatKhau))
             {
                 ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không chính xác.");
                 return View(model);
             }
 
-            // Nếu tài khoản cũ chưa băm mật khẩu, tự động nâng cấp sang mã SHA-256
+            // Cơ chế tương thích ngược: Tự động mã hóa sang chuẩn SHA-256 đối với các tài khoản dữ liệu cũ
             if (user.MatKhau == model.MatKhau)
             {
                 user.MatKhau = PasswordHelper.HashPassword(model.MatKhau);
@@ -58,7 +58,7 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                 return View(model);
             }
 
-            // Lưu Session
+            // Khởi tạo phiên làm việc (Session) lưu trữ ngữ cảnh người dùng
             HttpContext.Session.SetInt32("MaTaiKhoan", user.MaTaiKhoan);
             HttpContext.Session.SetString("HoTen", user.HoTen);
             HttpContext.Session.SetString("VaiTro", user.VaiTro);
@@ -73,14 +73,12 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             }
         }
 
-        // GET: /TaiKhoan/DangXuat
         public IActionResult DangXuat()
         {
             HttpContext.Session.Clear();
             return RedirectToAction("DangNhap", "TaiKhoan");
         }
 
-        // POST: /TaiKhoan/QuenMatKhau
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> QuenMatKhau(string tenDangNhap, string email)
@@ -101,7 +99,7 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                 return RedirectToAction(nameof(DangNhap));
             }
 
-            // Đặt lại mật khẩu mặc định và băm sang SHA-256 ngay lập tức
+            // Khôi phục mật khẩu mặc định và lập tức băm bảo mật trước khi cập nhật CSDL
             user.MatKhau = PasswordHelper.HashPassword("123456");
             await _context.SaveChangesAsync();
 
@@ -109,12 +107,11 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return RedirectToAction(nameof(DangNhap));
         }
 
-        // GET: /TaiKhoan/AccessDenied
         public IActionResult AccessDenied()
         {
             return View();
         }
-        // GET: /TaiKhoan/HoSo
+
         [HttpGet]
         public async Task<IActionResult> HoSo()
         {
@@ -133,7 +130,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View(taiKhoan);
         }
 
-        // GET: /TaiKhoan/DoiMatKhau
         [HttpGet]
         public IActionResult DoiMatKhau()
         {
@@ -144,7 +140,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View();
         }
 
-        // POST: /TaiKhoan/DoiMatKhau
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DoiMatKhau(DoiMatKhauViewModel model)
@@ -157,14 +152,13 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             var user = await _context.TaiKhoan.FindAsync(maTaiKhoan);
             if (user == null) return RedirectToAction(nameof(DangNhap));
 
-            // Xác thực mật khẩu cũ bằng hàm băm SHA-256
+            // Xác thực tính hợp lệ của mật khẩu hiện tại thông qua mã băm lưu trữ
             if (!PasswordHelper.VerifyPassword(model.MatKhauCu, user.MatKhau))
             {
                 ModelState.AddModelError("MatKhauCu", "Mật khẩu hiện tại không chính xác.");
                 return View(model);
             }
 
-            // Băm mật khẩu mới và lưu vào cơ sở dữ liệu
             user.MatKhau = PasswordHelper.HashPassword(model.MatKhauMoi);
             await _context.SaveChangesAsync();
 

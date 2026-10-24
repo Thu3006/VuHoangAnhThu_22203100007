@@ -7,7 +7,8 @@ using System.IO;
 namespace QuanLyBaiDoXe_UNETI.Controllers
 {
     // Họ và tên: Vũ Hoàng Anh Thư
-    // Nội dung: Dashboard và các truy vấn LINQ Thống kê phân tích dữ liệu
+    // Mã sinh viên: 22203100007
+    // Nội dung thực hiện: Module 4 - Thống kê báo cáo, Trực quan hóa số liệu Dashboard & Xuất file Excel (ClosedXML)
     public class ThongKeController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -17,12 +18,14 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Xác thực quyền Quản trị viên từ Session trước khi truy cập trang báo cáo
+        /// </summary>
         private bool IsAdmin()
         {
             return HttpContext.Session.GetString("VaiTro") == "Admin";
         }
 
-        // GET: ThongKe (Dashboard & Báo cáo)
         public async Task<IActionResult> Index()
         {
             if (!IsAdmin())
@@ -32,7 +35,7 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
 
             var model = new DashboardViewModel();
 
-            // 1. Thống kê số lượng tổng quan bằng LINQ Count / Sum
+            // Tổng hợp các chỉ số hoạt động tổng quan của bãi xe
             model.TongSoLoaiXe = await _context.LoaiPhuongTien.CountAsync();
             model.TongSoViTri = await _context.ViTriDoXe.CountAsync();
             model.SoViTriTrong = await _context.ViTriDoXe.CountAsync(v => v.TrangThai == "Còn trống");
@@ -43,12 +46,11 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             model.SoPhieuChoXacNhan = await _context.PhieuGuiXe.CountAsync(p => p.TrangThai == "Chờ xác nhận");
             model.SoXeDangGui = await _context.PhieuGuiXe.CountAsync(p => p.TrangThai == "Đang gửi");
 
-            // Tổng doanh thu từ các phiếu đã hoàn thành (Đã lấy xe)
+            // Tính tổng doanh thu thực tế từ toàn bộ các lượt gửi đã hoàn tất thanh toán
             model.TongDoanhThu = await _context.PhieuGuiXe
                 .Where(p => p.TrangThai == "Đã lấy xe" && p.ThanhTien.HasValue)
                 .SumAsync(p => p.ThanhTien!.Value);
 
-            // 2. Thống kê theo từng loại xe (LINQ GroupBy)
             var dsLoaiXe = await _context.LoaiPhuongTien
                 .Include(l => l.DanhSachPhuongTien)
                 .ToListAsync();
@@ -58,6 +60,7 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                 .Where(p => p.TrangThai == "Đã lấy xe")
                 .ToListAsync();
 
+            // Thống kê phân loại cơ cấu lượt gửi và doanh thu theo từng chủng loại phương tiện
             model.ThongKeTheoLoaiXe = dsLoaiXe.Select(l => new ThongKeLoaiXeItem
             {
                 TenLoaiXe = l.TenLoaiPhuongTien,
@@ -66,7 +69,7 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                 DoanhThu = dsPhieuHoanTat.Where(p => p.PhuongTien?.MaLoaiPhuongTien == l.MaLoaiPhuongTien).Sum(p => p.ThanhTien ?? 0)
             }).ToList();
 
-            // 3. Vị trí đỗ có số lượt sử dụng nhiều nhất (LINQ GroupBy + OrderByDescending)
+            // Truy vấn tần suất sử dụng các vị trí đỗ và trích xuất Top 5 vị trí phát sinh lượt đỗ nhiều nhất
             model.ThongKeTheoViTri = await _context.PhieuGuiXe
                 .Include(p => p.ViTriDoXe)
                 .Where(p => p.TrangThai != "Đã hủy" && p.ViTriDoXe != null)
@@ -79,10 +82,10 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                     SoLuotSuDung = g.Count()
                 })
                 .OrderByDescending(v => v.SoLuotSuDung)
-                .Take(5) // Lấy Top 5 vị trí được đỗ nhiều nhất
+                .Take(5)
                 .ToListAsync();
 
-            // 4. Doanh thu và lượt gửi theo từng tháng (LINQ GroupBy theo Năm/Tháng)
+            // Gom nhóm và phân tích xu hướng biến động doanh thu theo từng chu kỳ Năm/Tháng
             model.DoanhThuTheoThang = await _context.PhieuGuiXe
                 .Where(p => p.TrangThai == "Đã lấy xe" && p.ThoiGianRaThucTe.HasValue)
                 .GroupBy(p => new { Nam = p.ThoiGianRaThucTe!.Value.Year, Thang = p.ThoiGianRaThucTe.Value.Month })
@@ -99,7 +102,7 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
 
             return View(model);
         }
-        // GET: /ThongKe/XuatBaoCaoExcel
+
         [HttpGet]
         public async Task<IActionResult> XuatBaoCaoExcel()
         {
@@ -108,7 +111,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                 return RedirectToAction("DangNhap", "TaiKhoan");
             }
 
-            // Lấy danh sách các phiếu gửi xe đã hoàn thành (Đã lấy xe)
             var danhSachPhieu = await _context.PhieuGuiXe
                 .Include(p => p.PhuongTien)
                     .ThenInclude(pt => pt!.LoaiPhuongTien)
@@ -123,7 +125,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             {
                 var worksheet = workbook.Worksheets.Add("BaoCaoDoanhThu");
 
-                // 1. Tiêu đề báo cáo
                 worksheet.Cell("A1").Value = "BÁO CÁO DOANH THU BÃI ĐỖ XE SMARTPARKING UNETI";
                 worksheet.Range("A1:G1").Merge().Style.Font.SetBold().Font.SetFontSize(16).Font.SetFontColor(XLColor.DarkBlue);
                 worksheet.Range("A1:G1").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
@@ -132,19 +133,17 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                 worksheet.Range("A2:G2").Merge().Style.Font.SetItalic().Font.SetFontSize(11).Font.SetFontColor(XLColor.DimGray);
                 worksheet.Range("A2:G2").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
 
-                // 2. Tiêu đề các cột
                 var headers = new string[] { "Mã Phiếu", "Biển Số Xe", "Chủ Xe", "Loại Phương Tiện", "Vị Trí Đỗ", "Thời Gian Ra", "Thành Tiền (VNĐ)" };
                 for (int i = 0; i < headers.Length; i++)
                 {
                     var cell = worksheet.Cell(4, i + 1);
                     cell.Value = headers[i];
                     cell.Style.Font.SetBold();
-                    cell.Style.Fill.SetBackgroundColor(XLColor.FromArgb(14, 165, 233)); // Màu xanh chủ đạo của app
+                    cell.Style.Fill.SetBackgroundColor(XLColor.FromArgb(14, 165, 233));
                     cell.Style.Font.SetFontColor(XLColor.White);
                     cell.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
                 }
 
-                // 3. Đổ dữ liệu từng dòng
                 int row = 5;
                 foreach (var item in danhSachPhieu)
                 {
@@ -162,7 +161,7 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                     row++;
                 }
 
-                // 4. Dòng tổng cộng doanh thu
+                // Thiết lập công thức hàm SUM tự động tính tổng tiền cột doanh thu
                 worksheet.Cell(row, 6).Value = "TỔNG CỘNG:";
                 worksheet.Cell(row, 6).Style.Font.SetBold().Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
 
@@ -171,11 +170,11 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                 cellTong.Style.Font.SetBold().Font.SetFontColor(XLColor.DarkGreen);
                 cellTong.Style.NumberFormat.Format = "#,##0";
 
-                // Kẻ viền (border) và tự căn chỉnh độ rộng cột
                 worksheet.Range(4, 1, row, 7).Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
                 worksheet.Range(4, 1, row, 7).Style.Border.SetInsideBorder(XLBorderStyleValues.Thin);
                 worksheet.Columns().AdjustToContents();
 
+                // Xuất file trực tiếp vào bộ nhớ đệm (MemoryStream) và trả về định dạng OpenXML (.xlsx)
                 using (var stream = new MemoryStream())
                 {
                     workbook.SaveAs(stream);
@@ -185,6 +184,5 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                 }
             }
         }
-
     }
 }

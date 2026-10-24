@@ -6,7 +6,6 @@ namespace QuanLyBaiDoXe_UNETI.Models
     // Nội dung: ViewModel đóng gói số liệu Dashboard và Thống kê LINQ
     public class DashboardViewModel
     {
-        // 1. Thống kê tổng quan (Dashboard Cards)
         public int TongSoLoaiXe { get; set; }
         public int TongSoViTri { get; set; }
         public int SoViTriTrong { get; set; }
@@ -18,7 +17,6 @@ namespace QuanLyBaiDoXe_UNETI.Models
         public int SoXeDangGui { get; set; }
         public decimal TongDoanhThu { get; set; }
 
-        // 2. Dữ liệu bảng thống kê nhóm bằng LINQ
         public List<ThongKeLoaiXeItem> ThongKeTheoLoaiXe { get; set; } = new List<ThongKeLoaiXeItem>();
         public List<ThongKeViTriItem> ThongKeTheoViTri { get; set; } = new List<ThongKeViTriItem>();
         public List<DoanhThuThangItem> DoanhThuTheoThang { get; set; } = new List<DoanhThuThangItem>();

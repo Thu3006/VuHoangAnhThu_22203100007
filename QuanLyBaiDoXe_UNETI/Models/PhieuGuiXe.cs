@@ -35,9 +35,8 @@ namespace QuanLyBaiDoXe_UNETI.Models
 
         [Required]
         [StringLength(30)]
-        public string TrangThai { get; set; } = "Chờ xác nhận"; // "Chờ xác nhận", "Đang gửi", "Đã lấy xe", "Đã hủy"
+        public string TrangThai { get; set; } = "Chờ xác nhận"; 
 
-        // Navigation Properties
         [ForeignKey("MaPhuongTien")]
         public virtual PhuongTien? PhuongTien { get; set; }
 

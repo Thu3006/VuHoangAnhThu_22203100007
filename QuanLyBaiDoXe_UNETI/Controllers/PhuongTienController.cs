@@ -6,7 +6,8 @@ using QuanLyBaiDoXe_UNETI.Models;
 namespace QuanLyBaiDoXe_UNETI.Controllers
 {
     // Họ và tên: Vũ Hoàng Anh Thư
-    // Nội dung: Module 3 - Quản lý xe cá nhân, Đăng ký gửi xe
+    // Mã sinh viên: 22203100007
+    // Nội dung thực hiện: Module 3 - Quản lý phương tiện cá nhân (CRUD, Ràng buộc biển số xe, Phân quyền sở hữu)
     public class PhuongTienController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -16,7 +17,9 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             _context = context;
         }
 
-        // Lấy thông tin chủ phương tiện tương ứng với tài khoản đang đăng nhập
+        /// <summary>
+        /// Truy xuất đối tượng chủ phương tiện liên kết với tài khoản đang đăng nhập
+        /// </summary>
         private async Task<ChuPhuongTien?> GetCurrentChuXeAsync()
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
@@ -25,7 +28,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return await _context.ChuPhuongTien.FirstOrDefaultAsync(c => c.MaTaiKhoan == maTaiKhoan);
         }
 
-        // GET: PhuongTien (Danh sách xe của tôi)
         public async Task<IActionResult> Index()
         {
             var chuXe = await GetCurrentChuXeAsync();
@@ -42,7 +44,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View(danhSachXe);
         }
 
-        // GET: PhuongTien/Create
         public async Task<IActionResult> Create()
         {
             var chuXe = await GetCurrentChuXeAsync();
@@ -52,7 +53,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View();
         }
 
-        // POST: PhuongTien/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PhuongTien phuongTien)
@@ -60,7 +60,7 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             var chuXe = await GetCurrentChuXeAsync();
             if (chuXe == null) return RedirectToAction("DangNhap", "TaiKhoan");
 
-            // Ràng buộc: Biển số xe không được trùng lặp
+            // Ngăn chặn đăng ký trùng biển số xe (chuẩn hóa khoảng trắng và không phân biệt chữ hoa/thường)
             bool isExist = await _context.PhuongTien.AnyAsync(p => p.BienSoXe.Trim().ToLower() == phuongTien.BienSoXe.Trim().ToLower());
             if (isExist)
             {
@@ -82,14 +82,13 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View(phuongTien);
         }
 
-        // GET: PhuongTien/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             var chuXe = await GetCurrentChuXeAsync();
             if (chuXe == null) return RedirectToAction("DangNhap", "TaiKhoan");
             if (id == null) return NotFound();
 
-            // Phân quyền dữ liệu: Không cho sửa xe của người khác
+            // Kiểm soát quyền truy cập dữ liệu: Chỉ cho phép người dùng chỉnh sửa phương tiện do chính mình sở hữu
             var xe = await _context.PhuongTien.FirstOrDefaultAsync(p => p.MaPhuongTien == id && p.MaChuPhuongTien == chuXe.MaChuPhuongTien);
             if (xe == null) return NotFound();
 
@@ -97,7 +96,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View(xe);
         }
 
-        // POST: PhuongTien/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, PhuongTien phuongTien)
@@ -106,7 +104,7 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             if (chuXe == null) return RedirectToAction("DangNhap", "TaiKhoan");
             if (id != phuongTien.MaPhuongTien) return NotFound();
 
-            // Kiểm tra biển số trùng với xe khác
+            // Đảm bảo biển số cập nhật không trùng với bất kỳ phương tiện nào khác trong hệ thống
             bool isDuplicate = await _context.PhuongTien.AnyAsync(p => p.MaPhuongTien != id && p.BienSoXe.Trim().ToLower() == phuongTien.BienSoXe.Trim().ToLower());
             if (isDuplicate)
             {

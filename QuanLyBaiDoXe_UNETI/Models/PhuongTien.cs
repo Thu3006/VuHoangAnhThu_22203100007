@@ -30,7 +30,6 @@ namespace QuanLyBaiDoXe_UNETI.Models
 
         public bool TrangThai { get; set; } = true;
 
-        // Navigation Properties
         [ForeignKey("MaChuPhuongTien")]
         public virtual ChuPhuongTien? ChuPhuongTien { get; set; }
 

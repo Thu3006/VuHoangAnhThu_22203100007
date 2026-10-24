@@ -38,7 +38,6 @@ namespace QuanLyBaiDoXe_UNETI.Models
 
         public bool TrangThai { get; set; } = true;
 
-        // Navigation Properties
         [ForeignKey("MaTaiKhoan")]
         public virtual TaiKhoan? TaiKhoan { get; set; }
         public virtual ICollection<PhuongTien> DanhSachPhuongTien { get; set; } = new List<PhuongTien>();

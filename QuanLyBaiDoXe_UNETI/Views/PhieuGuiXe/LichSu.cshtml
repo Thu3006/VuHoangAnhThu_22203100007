@@ -137,7 +137,7 @@
 </div>
 
 @section Scripts {
-    <!-- Thư viện sinh QRCode JS siêu nhẹ, chạy hoàn toàn offline -->
+    <!-- Thư viện sinh QRCode JS  -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
@@ -149,14 +149,11 @@
             document.getElementById('qrGioVao').innerText = gioVao;
             document.getElementById('qrTrangThai').innerText = trangThai;
 
-            // Xóa QR cũ
             var container = document.getElementById('qrcodeCanvas');
             container.innerHTML = "";
 
-            // Nội dung nhúng vào QR Code
             var qrText = "SMARTPARKING_UNETI|PHIEU:" + maPhieu + "|XE:" + bienSo + "|VITRI:" + viTri + "|VAO:" + gioVao;
 
-            // Khởi tạo QR Code mới
             new QRCode(container, {
                 text: qrText,
                 width: 170,

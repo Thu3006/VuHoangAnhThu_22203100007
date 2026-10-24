@@ -1,161 +1,377 @@
 ﻿@model QuanLyBaiDoXe_UNETI.Models.LoginViewModel
-
 @{
     ViewData["Title"] = "Đăng nhập hệ thống";
+    Layout = null;
 }
 
-<div class="row justify-content-center align-items-center" style="min-height: 75vh;">
-    <div class="col-md-5 col-lg-4">
-        <div class="card shadow border-0 rounded-4 overflow-hidden">
-            <!-- Header Card -->
-            <div class="card-header text-white text-center py-4 border-0" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
-                <div class="d-inline-flex p-3 rounded-circle bg-white bg-opacity-10 mb-2">
-                    <i class="bi bi-p-square-fill text-info fs-2"></i>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SmartParking UNETI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body, html {
+            height: 100%;
+            margin: 0;
+            background-color: #0f172a;
+            overflow-x: hidden;
+        }
+
+        .main-container {
+            min-height: 100vh;
+        }
+
+        .brand-side {
+            position: relative;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 58, 138, 0.88) 100%), url('https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 3.5rem;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            width: fit-content;
+        }
+
+        .brand-title {
+            font-size: 2.4rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-top: 1.5rem;
+            line-height: 1.25;
+        }
+
+            .brand-title span {
+                color: #38bdf8;
+            }
+
+        .feature-list {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .student-credit {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            padding-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .form-side {
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            min-height: 100vh;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .form-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.35rem;
+        }
+
+        .form-subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group-custom {
+            position: relative;
+            margin-bottom: 1.25rem;
+        }
+
+            .input-group-custom i {
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #94a3b8;
+            }
+
+            .input-group-custom .form-control {
+                padding-left: 2.75rem;
+                height: 48px;
+                border-radius: 10px;
+                border: 1px solid #e2e8f0;
+                font-size: 0.95rem;
+            }
+
+                .input-group-custom .form-control:focus {
+                    border-color: #0284c7;
+                    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+                }
+
+        .btn-primary-custom {
+            height: 48px;
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #ffffff;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            transition: all 0.2s;
+        }
+
+            .btn-primary-custom:hover {
+                opacity: 0.95;
+                transform: translateY(-1px);
+                box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+            }
+
+        .test-accounts-box {
+            margin-top: 1.75rem;
+            padding: 1.2rem;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+        }
+
+        .test-accounts-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .test-account-badge {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #334155;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+            .test-account-badge:hover {
+                background: #cbd5e1;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid p-0 main-container">
+        <div class="row g-0 h-100">
+            <!-- Cột trái: Chiếm 7 phần trên Desktop (Ẩn trên Mobile) -->
+            <div class="col-lg-7 d-none d-lg-block">
+                <div class="brand-side">
+                    <div>
+                        <div class="brand-badge">
+                            <i class="fa-solid fa-graduation-cap text-warning"></i>
+                            ĐẠI HỌC KINH TẾ - KỸ THUẬT CÔNG NGHIỆP (UNETI)
+                        </div>
+
+                        <div class="brand-title">
+                            SmartParking<br />
+                            <span>Bãi Đỗ Xe Thông Minh</span>
+                        </div>
+
+                        <div class="feature-list">
+                            <div class="feature-item">
+                                <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                                <div>
+                                    <strong>Bảo mật & Phân quyền</strong><br />
+                                    <small class="text-slate-400">Quản lý phiên Session, mã hóa băm mật khẩu SHA-256 an toàn.</small>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon"><i class="fa-solid fa-clock"></i></div>
+                                <div>
+                                    <strong>Chống xung đột lịch giữ chỗ</strong><br />
+                                    <small class="text-slate-400">Thuật toán LINQ kiểm tra giao thoa thời gian đỗ chính xác.</small>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                                <div>
+                                    <strong>Thống kê trực quan & Xuất Excel</strong><br />
+                                    <small class="text-slate-400">Dashboard thời gian thực và tích hợp thư viện ClosedXML.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="student-credit">
+                        <div><strong>Sinh viên thực hiện:</strong> Vũ Hoàng Anh Thư - MSV: 22203100007</div>
+                        <div><strong>Nền tảng:</strong> ASP.NET Core MVC (.NET 8.0)</div>
+                    </div>
                 </div>
-                <h4 class="mb-1 fw-bold text-white">SmartParking UNETI</h4>
-                <p class="mb-0 small text-light text-opacity-75">Hệ thống Đăng ký & Quản lý Bãi đỗ xe</p>
             </div>
 
-            <!-- Body Card -->
-            <div class="card-body p-4 p-md-5 bg-white">
-                <!-- Thông báo khôi phục mật khẩu nếu có -->
-                @if (TempData["ForgotSuccess"] != null)
-                {
-                    <div class="alert alert-success py-2 small mb-3">
-                        <i class="bi bi-check-circle-fill me-1"></i>@TempData["ForgotSuccess"]
-                    </div>
-                }
-                @if (TempData["ForgotError"] != null)
-                {
-                    <div class="alert alert-danger py-2 small mb-3">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i>@TempData["ForgotError"]
-                    </div>
-                }
+            <div class="col-lg-5 col-12">
+                <div class="form-side">
+                    <div class="form-container">
+                        <h2 class="form-title">Đăng nhập</h2>
+                        <p class="form-subtitle">Chào mừng bạn trở lại! Vui lòng nhập thông tin tài khoản.</p>
 
-                <form asp-action="DangNhap" method="post" id="loginForm" autocomplete="off">
-                    @Html.AntiForgeryToken()
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty] != null)
+                        {
+                            <div class="alert alert-danger py-2 px-3 mb-3 d-flex align-items-center gap-2" role="alert" style="font-size: 0.9rem;">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <div>@Html.ValidationSummary(true, "", new { @class = "mb-0 text-danger" })</div>
+                            </div>
+                        }
 
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-3" role="alert"></div>
+                        @if (TempData["ForgotSuccess"] != null)
+                        {
+                            <div class="alert alert-success py-2 px-3 mb-3" style="font-size: 0.9rem;">
+                                <i class="fa-solid fa-circle-check me-1"></i> @TempData["ForgotSuccess"]
+                            </div>
+                        }
 
-                    <!-- Tên đăng nhập -->
-                    <div class="mb-3">
-                        <label asp-for="TenDangNhap" class="form-label small fw-bold text-secondary">Tên đăng nhập</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
-                            <input asp-for="TenDangNhap" id="usernameInput" class="form-control border-start-0" placeholder="Nhập tên tài khoản..." autofocus />
-                        </div>
-                        <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
-                    </div>
+                        <form asp-action="DangNhap" method="post">
+                            @Html.AntiForgeryToken()
 
-                    <!-- Mật khẩu -->
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label asp-for="MatKhau" class="form-label small fw-bold text-secondary mb-0">Mật khẩu</label>
-                            <a href="#" data-bs-toggle="modal" data-bs-target="#forgotModal" class="small text-decoration-none text-primary">
-                                Quên mật khẩu?
-                            </a>
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
-                            <input asp-for="MatKhau" type="password" id="passwordInput" class="form-control border-start-0 border-end-0" placeholder="Nhập mật khẩu..." autocomplete="new-password" />
-                            <button class="btn btn-outline-light border border-start-0 bg-light text-muted" type="button" id="togglePassword">
-                                <i class="bi bi-eye" id="eyeIcon"></i>
+                            <div class="input-group-custom">
+                                <i class="fa-solid fa-user"></i>
+                                <input asp-for="TenDangNhap" class="form-control" placeholder="Tên đăng nhập" autofocus id="inputUsername" />
+                                <span asp-validation-for="TenDangNhap" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="input-group-custom">
+                                <i class="fa-solid fa-lock"></i>
+                                <input asp-for="MatKhau" type="password" class="form-control" placeholder="Mật khẩu" id="inputPassword" />
+                                <span asp-validation-for="MatKhau" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="rememberMe">
+                                    <label class="form-check-label text-muted small" for="rememberMe">Ghi nhớ đăng nhập</label>
+                                </div>
+                                <a href="javascript:void(0)" class="text-decoration-none small text-primary" data-bs-toggle="modal" data-bs-target="#forgotModal">Quên mật khẩu?</a>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary-custom">
+                                <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập hệ thống
                             </button>
-                        </div>
-                        <span asp-validation-for="MatKhau" class="text-danger small"></span>
-                    </div>
+                        </form>
 
-                    <!-- Ghi nhớ đăng nhập hoạt động thật -->
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="rememberMe">
-                            <label class="form-check-label small text-secondary" for="rememberMe">
-                                Ghi nhớ đăng nhập
-                            </label>
+                        <div class="test-accounts-box">
+                            <div class="test-accounts-title">
+                                <i class="fa-solid fa-vial"></i> Tài khoản mẫu kiểm thử nhanh
+                            </div>
+                            <div class="d-flex flex-column gap-2" style="font-size: 0.85rem;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><strong>Admin:</strong> <span class="test-account-badge" onclick="fillAccount('admin', '123456')">admin</span></span>
+                                    <span class="text-muted">MK: <code>123456</code></span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><strong>Khách hàng:</strong> <span class="test-account-badge" onclick="fillAccount('khachhang01', '300623')">khachhang01</span></span>
+                                    <span class="text-muted">MK: <code>300623</code></span>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block mt-2" style="font-size: 0.75rem;">* Click trực tiếp vào tên tài khoản trên để tự động điền.</small>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                    <!-- Nút Đăng nhập -->
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary py-2 fw-semibold rounded-3 shadow-sm">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
-                        </button>
+    <div class="modal fade" id="forgotModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bold">Khôi phục mật khẩu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="QuenMatKhau" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3">Nhập tên đăng nhập và email đã đăng ký. Mật khẩu sẽ được hoàn về mặc định: <code>123456</code>.</p>
+                        <div class="mb-3">
+                            <label class="form-label small font-weight-bold">Tên đăng nhập</label>
+                            <input type="text" name="tenDangNhap" class="form-control" required placeholder="Ví dụ: admin" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small font-weight-bold">Email xác thực</label>
+                            <input type="email" name="email" class="form-control" required placeholder="Ví dụ: admin@uneti.edu.vn" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-3">Xác nhận cấp lại</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal Khôi phục mật khẩu qua Gmail -->
-<div class="modal fade" id="forgotModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content shadow border-0 rounded-4">
-            <div class="modal-header border-0 pb-0">
-                <h6 class="modal-title fw-bold text-dark"><i class="bi bi-shield-lock text-primary me-2"></i>Quên mật khẩu</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form asp-action="QuenMatKhau" method="post">
-                @Html.AntiForgeryToken()
-                <div class="modal-body p-4">
-                    <p class="small text-muted mb-3">Nhập tên đăng nhập và địa chỉ Gmail đã đăng ký để xác thực đặt lại mật khẩu:</p>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-secondary">Tên đăng nhập</label>
-                        <input type="text" name="tenDangNhap" class="form-control" placeholder="Ví dụ: khachhang01" required />
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-secondary">Email liên kết</label>
-                        <input type="email" name="email" class="form-control" placeholder="Ví dụ: nguyenvana@gmail.com" required />
-                    </div>
-                </div>
-                <div class="modal-footer border-0 pt-0 px-4 pb-4">
-                    <button type="button" class="btn btn-light btn-sm px-3" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary btn-sm px-3 fw-semibold">Xác nhận khôi phục</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // 1. Bật / tắt ẩn hiện mật khẩu
-        const togglePassword = document.querySelector('#togglePassword');
-        const passwordInput = document.querySelector('#passwordInput');
-        const eyeIcon = document.querySelector('#eyeIcon');
-
-        togglePassword.addEventListener('click', function () {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            eyeIcon.classList.toggle('bi-eye');
-            eyeIcon.classList.toggle('bi-eye-slash');
-        });
-
-        // 2. Logic Ghi nhớ đăng nhập bằng LocalStorage
-        const usernameInput = document.getElementById('usernameInput');
-        const rememberCheckbox = document.getElementById('rememberMe');
-        const loginForm = document.getElementById('loginForm');
-
-        // Tự động nạp lại tên đăng nhập đã lưu từ trước (nếu có)
-        const savedUsername = localStorage.getItem('smartparking_username');
-        if (savedUsername) {
-            usernameInput.value = savedUsername;
-            rememberCheckbox.checked = true;
+        function fillAccount(username, password) {
+            document.getElementById('inputUsername').value = username;
+            document.getElementById('inputPassword').value = password;
         }
-
-        // Khi người dùng bấm submit form đăng nhập
-        loginForm.addEventListener('submit', function () {
-            if (rememberCheckbox.checked) {
-                localStorage.setItem('smartparking_username', usernameInput.value.trim());
-            } else {
-                localStorage.removeItem('smartparking_username');
-            }
-        });
     </script>
-}
+</body>
+</html>

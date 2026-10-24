@@ -19,7 +19,6 @@
     </div>
 </div>
 
-<!-- HÀNG 1: CÁC THẺ METRIC TỔNG QUAN -->
 <div class="row g-3 mb-4">
     <div class="col-md-3">
         <div class="card shadow-sm border-0 bg-white p-3 h-100">
@@ -78,9 +77,7 @@
     </div>
 </div>
 
-<!-- HÀNG 2: 2 KHUNG BIỂU ĐỒ CHART.JS (NÂNG CAO) -->
 <div class="row g-4 mb-4">
-    <!-- Biểu đồ cột: Doanh thu theo tháng -->
     <div class="col-md-7">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
@@ -95,7 +92,6 @@
         </div>
     </div>
 
-    <!-- Biểu đồ tròn: Cơ cấu loại phương tiện -->
     <div class="col-md-5">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
@@ -113,9 +109,8 @@
     </div>
 </div>
 
-<!-- HÀNG 3: BẢNG DOANH THU THEO THÁNG & TOP VỊ TRÍ SỬ DỤNG NHIỀU NHẤT -->
+
 <div class="row g-4 mb-4">
-    <!-- Doanh thu theo tháng -->
     <div class="col-md-7">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-white border-bottom py-3">
@@ -151,7 +146,6 @@
         </div>
     </div>
 
-    <!-- Top vị trí sử dụng nhiều nhất -->
     <div class="col-md-5">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-white border-bottom py-3">
@@ -188,7 +182,6 @@
     </div>
 </div>
 
-<!-- HÀNG 4: BẢNG PHÂN BỐ THEO LOẠI XE -->
 <div class="card shadow-sm border-0">
     <div class="card-header bg-white border-bottom py-3">
         <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-table text-info me-2"></i>Chi Tiết Doanh Thu & Lượt Gửi Theo Từng Loại Xe</h6>
@@ -221,21 +214,17 @@
 </div>
 
 @section Scripts {
-    <!-- Thư viện Chart.js CDN chính thức -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Hàm tiện ích giải mã ký tự HTML tiếng Việt an toàn
             function decodeHtml(html) {
                 var txt = document.createElement("textarea");
                 txt.innerHTML = html;
                 return txt.value;
             }
 
-            // ==========================================
-            // 1. DỮ LIỆU & VẼ BIỂU ĐỒ DOANH THU THEO THÁNG
-            // ==========================================
+           
             var revenueLabels = [];
             var revenueData = [];
 
@@ -292,9 +281,7 @@
                 }
             });
 
-            // ==========================================
-            // 2. DỮ LIỆU & VẼ BIỂU ĐỒ TRÒN LOẠI PHƯƠNG TIỆN (ĐÃ FIX TIẾNG VIỆT)
-            // ==========================================
+           
             var rawTypeLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeTheoLoaiXe.Select(x => x.TenLoaiXe)));
             var typeData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeTheoLoaiXe.Select(x => x.SoLuongXe)));
 
@@ -306,10 +293,10 @@
                     datasets: [{
                         data: typeData,
                         backgroundColor: [
-                            '#3b82f6', // Xanh dương (Xe máy)
-                            '#10b981', // Xanh ngọc (Ô tô 4-7 chỗ)
-                            '#f59e0b', // Vàng cam (Xe đạp điện)
-                            '#8b5cf6'  // Tím
+                            '#3b82f6', 
+                            '#10b981', 
+                            '#f59e0b', 
+                            '#8b5cf6'  
                         ],
                         borderWidth: 3,
                         borderColor: '#ffffff'

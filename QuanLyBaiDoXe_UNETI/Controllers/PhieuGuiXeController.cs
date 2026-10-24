@@ -6,7 +6,8 @@ using QuanLyBaiDoXe_UNETI.Models;
 namespace QuanLyBaiDoXe_UNETI.Controllers
 {
     // Họ và tên: Vũ Hoàng Anh Thư
-    // Nội dung: Xử lý quy trình gửi xe, xác nhận vào/ra, tính phí tự động, quản lý phiếu
+    // Mã sinh viên: 22203100007
+    // Nội dung thực hiện: Module 2 - Quản lý phiếu gửi xe (Đăng ký giữ chỗ, Check-in/Check-out, Tính phí tự động)
     public class PhieuGuiXeController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -16,11 +17,17 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Xác thực quyền Quản trị viên từ Session
+        /// </summary>
         private bool IsAdmin()
         {
             return HttpContext.Session.GetString("VaiTro") == "Admin";
         }
 
+        /// <summary>
+        /// Truy xuất thông tin chủ xe hiện tại thông qua mã tài khoản lưu trong Session
+        /// </summary>
         private async Task<ChuPhuongTien?> GetCurrentChuXeAsync()
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
@@ -28,9 +35,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return await _context.ChuPhuongTien.FirstOrDefaultAsync(c => c.MaTaiKhoan == maTaiKhoan);
         }
 
-        // ========================== PHÍA KHÁCH HÀNG ==========================
-
-        // GET: PhieuGuiXe/DangKy
         [HttpGet]
         public async Task<IActionResult> DangKy(int? maViTri)
         {
@@ -60,7 +64,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View(model);
         }
 
-        // POST: PhieuGuiXe/DangKy
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DangKy(DangKyGuiXeViewModel model)
@@ -92,6 +95,7 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                 ModelState.AddModelError("ThoiGianDuKienRa", "Thời gian dự kiến ra phải sau thời gian dự kiến vào.");
             }
 
+            // Kiểm tra phương tiện có đang trong một phiên gửi xe chưa kết thúc hay không
             bool xeDangGui = await _context.PhieuGuiXe.AnyAsync(p =>
                 p.MaPhuongTien == model.MaPhuongTien &&
                 (p.TrangThai == "Chờ xác nhận" || p.TrangThai == "Đang gửi"));
@@ -101,6 +105,7 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                 ModelState.AddModelError("MaPhuongTien", "Phương tiện này hiện đang có một phiếu gửi xe chưa hoàn tất.");
             }
 
+            // Thuật toán kiểm tra giao thoa khoảng thời gian [StartA < EndB && EndA > StartB]
             bool biTrungLich = await _context.PhieuGuiXe.AnyAsync(p =>
                 p.MaViTri == model.MaViTri &&
                 p.TrangThai != "Đã hủy" && p.TrangThai != "Đã lấy xe" &&
@@ -137,7 +142,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View(model);
         }
 
-        // GET: PhieuGuiXe/LichSu
         public async Task<IActionResult> LichSu()
         {
             var chuXe = await GetCurrentChuXeAsync();
@@ -153,9 +157,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View(danhSachPhieu);
         }
 
-        // ========================== PHÍA ADMIN ==========================
-
-        // GET: PhieuGuiXe/Index (Admin quản lý danh sách phiếu, tìm kiếm & lọc)
         public async Task<IActionResult> Index(string? searchTerm, string? trangThai, int? maLoaiPhuongTien)
         {
             if (!IsAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
@@ -168,7 +169,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                 .Include(p => p.ViTriDoXe)
                 .AsQueryable();
 
-            // Tìm kiếm theo Biển số xe hoặc Tên chủ phương tiện bằng LINQ
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 var term = searchTerm.Trim().ToLower();
@@ -177,13 +177,11 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                     (p.PhuongTien != null && p.PhuongTien.ChuPhuongTien != null && p.PhuongTien.ChuPhuongTien.HoTen.ToLower().Contains(term)));
             }
 
-            // Lọc theo trạng thái phiếu
             if (!string.IsNullOrWhiteSpace(trangThai))
             {
                 query = query.Where(p => p.TrangThai == trangThai);
             }
 
-            // Lọc theo loại phương tiện
             if (maLoaiPhuongTien.HasValue && maLoaiPhuongTien.Value > 0)
             {
                 query = query.Where(p => p.PhuongTien != null && p.PhuongTien.MaLoaiPhuongTien == maLoaiPhuongTien.Value);
@@ -198,7 +196,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View(danhSach);
         }
 
-        // POST: PhieuGuiXe/XacNhanVao/5 (Xác nhận xe vào bãi)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> XacNhanVao(int id)
@@ -215,11 +212,9 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Cập nhật trạng thái phiếu: Chờ xác nhận -> Đang gửi
             phieu.ThoiGianVaoThucTe = DateTime.Now;
             phieu.TrangThai = "Đang gửi";
 
-            // Cập nhật vị trí đỗ: Đang sử dụng
             if (phieu.ViTriDoXe != null)
             {
                 phieu.ViTriDoXe.TrangThai = "Đang sử dụng";
@@ -230,7 +225,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: PhieuGuiXe/XacNhanRa/5 (Xác nhận xe ra bãi & Tính tiền tự động)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> XacNhanRa(int id)
@@ -252,22 +246,20 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
 
             if (thoiGianRa <= thoiGianVao)
             {
-                thoiGianRa = thoiGianVao.AddMinutes(5); // Đảm bảo thời gian ra luôn sau thời gian vào
+                thoiGianRa = thoiGianVao.AddMinutes(5);
             }
 
             phieu.ThoiGianRaThucTe = thoiGianRa;
 
-            // QUY TẮC TÍNH TIỀN TỰ ĐỘNG:
-            // Tính số giờ thực tế, làm tròn lên theo mốc (tối thiểu 1 giờ, lẻ phút tính tròn 1 giờ)
+            // Quy tắc tính tiền: Tính tổng giờ thực tế, làm tròn lên số nguyên gần nhất (tối thiểu 1 giờ)
             var tongGio = (thoiGianRa - thoiGianVao).TotalHours;
             int soGioTinhPhi = (int)Math.Ceiling(tongGio);
             if (soGioTinhPhi < 1) soGioTinhPhi = 1;
 
-            // Công thức chuẩn: ThanhTien = SoGioTinhPhi * DonGiaTheoGio
             phieu.ThanhTien = soGioTinhPhi * phieu.DonGiaTheoGio;
             phieu.TrangThai = "Đã lấy xe";
 
-            // Giải phóng vị trí đỗ về: Còn trống
+            // Giải phóng trạng thái vị trí đỗ
             if (phieu.ViTriDoXe != null)
             {
                 phieu.ViTriDoXe.TrangThai = "Còn trống";
@@ -278,7 +270,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: PhieuGuiXe/HuyPhieu/5 (Hủy phiếu)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> HuyPhieu(int id)

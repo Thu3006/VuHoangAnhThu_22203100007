@@ -15,7 +15,6 @@ namespace QuanLyBaiDoXe_UNETI.Models
         public string? TrangThai { get; set; }
         public string? SortOrder { get; set; }
 
-        // Dữ liệu phục vụ phân trang
         public int CurrentPage { get; set; } = 1;
         public int PageSize { get; set; } = 8; 
         public int TotalPages { get; set; }

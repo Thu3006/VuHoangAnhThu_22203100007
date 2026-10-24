@@ -16,14 +16,15 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             _context = context;
         }
 
-        // Hàm tiện ích: Kiểm tra quyền Admin từ Session
+        /// <summary>
+        /// Kiểm tra vai trò quản trị viên từ Session trước khi thực thi nghiệp vụ
+        /// </summary>
         private bool IsAdmin()
         {
             var role = HttpContext.Session.GetString("VaiTro");
             return role == "Admin";
         }
 
-        // GET: LoaiPhuongTien
         public async Task<IActionResult> Index()
         {
             if (!IsAdmin())
@@ -39,7 +40,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View(danhSach);
         }
 
-        // GET: LoaiPhuongTien/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (!IsAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
@@ -55,21 +55,19 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View(loai);
         }
 
-        // GET: LoaiPhuongTien/Create
         public IActionResult Create()
         {
             if (!IsAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
             return View();
         }
 
-        // POST: LoaiPhuongTien/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(LoaiPhuongTien loaiPhuongTien)
         {
             if (!IsAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
 
-            // Kiểm tra trùng tên loại phương tiện bằng LINQ
+            // Ngăn chặn tạo trùng tên loại phương tiện (bỏ qua khoảng trắng và không phân biệt chữ hoa/thường)
             bool isExist = await _context.LoaiPhuongTien
                 .AnyAsync(l => l.TenLoaiPhuongTien.Trim().ToLower() == loaiPhuongTien.TenLoaiPhuongTien.Trim().ToLower());
 
@@ -93,7 +91,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View(loaiPhuongTien);
         }
 
-        // GET: LoaiPhuongTien/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (!IsAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
@@ -105,7 +102,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View(loai);
         }
 
-        // POST: LoaiPhuongTien/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, LoaiPhuongTien loaiPhuongTien)
@@ -113,7 +109,7 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             if (!IsAdmin()) return RedirectToAction("DangNhap", "TaiKhoan");
             if (id != loaiPhuongTien.MaLoaiPhuongTien) return NotFound();
 
-            // Kiểm tra trùng tên với bản ghi khác
+            // Kiểm tra trùng tên với các bản ghi khác ngoài bản ghi đang cập nhật
             bool isDuplicate = await _context.LoaiPhuongTien
                 .AnyAsync(l => l.MaLoaiPhuongTien != id && l.TenLoaiPhuongTien.Trim().ToLower() == loaiPhuongTien.TenLoaiPhuongTien.Trim().ToLower());
 
@@ -147,7 +143,6 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
             return View(loaiPhuongTien);
         }
 
-        // POST: LoaiPhuongTien/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -161,7 +156,7 @@ namespace QuanLyBaiDoXe_UNETI.Controllers
 
             if (loai == null) return NotFound();
 
-            // Ràng buộc bắt buộc: Không cho xóa nếu đang có xe hoặc vị trí đỗ tham chiếu tới
+            // Bảo vệ toàn vẹn dữ liệu: Ngăn chặn xóa danh mục nếu đang phát sinh khóa ngoại liên kết
             if (loai.DanhSachViTri.Any() || loai.DanhSachPhuongTien.Any())
             {
                 TempData["ErrorMessage"] = $"Không thể xóa loại [{loai.TenLoaiPhuongTien}] vì đang có {loai.DanhSachViTri.Count} vị trí đỗ hoặc {loai.DanhSachPhuongTien.Count} phương tiện sử dụng!";

@@ -29,11 +29,10 @@ namespace QuanLyBaiDoXe_UNETI.Models
 
         [Required]
         [StringLength(20)]
-        public string VaiTro { get; set; } = "KhachHang"; // "Admin" hoặc "KhachHang"
+        public string VaiTro { get; set; } = "KhachHang"; 
 
-        public bool TrangThai { get; set; } = true; // true: Hoạt động, false: Khóa
+        public bool TrangThai { get; set; } = true; 
 
-        // Navigation property 1 - 1 với ChuPhuongTien
         public virtual ChuPhuongTien? ChuPhuongTien { get; set; }
     }
 }
